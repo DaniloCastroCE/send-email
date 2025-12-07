@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="author" content="Danilo de Castro">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/loading.css">
+  <title>Enviar Email</title>
+</head>
+<body>
+  <section class="loading">
+    <div class="spinner">
+      <img src="/img/spinner/spinner.gif" alt="spinner">
+      <p>Aguarde...</p>
+    </div>
+  </section>
+  <main>
+    <form id="form">
+      <div class="form-group">
+        <label for="host">Host <span>(Opcional)</span></label>
+        <input type="text" id="host" name="host" placeholder="Servidor SMTP">
+      </div>
+      <div class="form-group">
+        <label for="from">De</label>
+        <input type="email" id="from" name="from" placeholder="Seu email" required> 
+      </div>
+      <div class="form-group"> 
+        <label for="password">Senha</label>
+        <input type="password" id="password" name="password" placeholder="Senha do email" required>
+      </div>
+      <div class="form-group">
+        <label for="to">Para</label>
+        <input type="email" id="to" name="to" placeholder="Email do destinatário" required>
+      </div>
+      <div class="form-group">
+        <label for="subject">Assunto</label>
+        <input type="text" id="subject" name="subject" placeholder="Assunto do email">
+      </div>
+      <div class="form-group">
+        <label for="body">Mensagem</label>
+        <div id="body" class="editable" contenteditable="true" placeholder="Digite sua mensagem ou cole imagens aqui!" required></div>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Enviar</button>
+      </div>
+    </form>
+  </main>
+  <script src="/js/script.js"></script>
+</body>
+</html>
