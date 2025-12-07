@@ -5,7 +5,6 @@ const func_loading = () => {
 }
 
 const handlePaste = async (event) => {
-  console.log(event.clipboardData.items);
   event.preventDefault();
 
   const clipboard = event.clipboardData;
