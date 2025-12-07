@@ -4,27 +4,47 @@ const func_loading = () => {
   loading.classList.toggle("show");
 }
 
-// Função para lidar com o paste de imagens na área de edição
 const handlePaste = async (event) => {
-  // Impede o comportamento padrão do paste (que pode causar colagem dupla)
+  console.log(event.clipboardData.items);
   event.preventDefault();
 
-  const clipboardItems = event.clipboardData.items;
-  for (let i = 0; i < clipboardItems.length; i++) {
-    const item = clipboardItems[i];
+  const clipboard = event.clipboardData;
+
+  // --- 🔥 SUPORTE PARA FIREFOX (usa files ao invés de items) ---
+  if (clipboard.files && clipboard.files.length > 0) {
+    for (const file of clipboard.files) {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = document.createElement("img");
+          img.src = reader.result;
+          bodyEditor.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    return; // já tratou o Firefox, sai da função
+  }
+  // --------------------------------------------------------------
+
+  // --- Chrome / Edge ---
+  const items = clipboard.items;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     if (item.type.indexOf("image") === 0) {
       const blob = item.getAsFile();
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64data = reader.result;
         const imgElement = document.createElement("img");
-        imgElement.src = base64data;  // Definindo a imagem com base64
-        document.getElementById("body").appendChild(imgElement);  // Adicionando a imagem à div de edição
+        imgElement.src = base64data;
+        bodyEditor.appendChild(imgElement);
       };
       reader.readAsDataURL(blob);
     }
   }
 };
+
 
 // Adiciona um ouvinte para o evento de "paste" na área de edição
 document.getElementById("body").addEventListener("paste", handlePaste);
