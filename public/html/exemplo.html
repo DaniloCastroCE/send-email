@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Enviar Email com Imagens</title>
+
+<style>
+  /* Estilos básicos da página */
+  body {
+    font-family: Arial;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+  }
+
+  /* Inputs e botões com tamanho e espaçamento */
+  input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+  }
+
+  /* Editor de texto com borda e altura mínima */
+  #bodyEditor {
+    width: 100%;
+    min-height: 200px;
+    border: 1px solid #aaa;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+  }
+
+  /* Miniaturas das imagens adicionadas */
+  #preview img {
+    max-width: 200px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    padding: 3px;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Enviar Email com Anexos e Imagens pelo Conteúdo</h2>
+
+<!-- Formulário principal onde os dados serão preenchidos -->
+<form id="emailForm">
+
+  <!-- Campos obrigatórios -->
+  <input type="email" name="from" placeholder="Seu e-mail (from)" required>
+  <input type="password" name="password" placeholder="Senha app (password)" required>
+  <input type="email" name="to" placeholder="Destinatário (to)" required>
+  <input type="text" name="subject" placeholder="Assunto (subject)">
+
+  <h3>Corpo do e-mail:</h3>
+
+  <!-- Editor de conteúdo do e-mail (aceita imagens coladas) -->
+  <div id="bodyEditor" contenteditable="true"></div>
+
+  <h3>Anexar imagens:</h3>
+
+  <!-- Input para anexar imagens manualmente -->
+  <input type="file" id="fileInput" accept="image/*" multiple>
+
+  <h3>Imagens adicionadas (coladas ou anexadas):</h3>
+
+  <!-- Mostra todas as imagens que foram carregadas ou coladas -->
+  <div id="preview"></div>
+
+  <button type="submit">Enviar Email</button>
+</form>
+
+<script>
+/* Referências aos elementos do DOM */
+const bodyEditor = document.getElementById("bodyEditor");
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+
+/* Arrays para armazenar imagens */
+let pastedImages = [];   // imagens coladas no editor
+let attachedImages = []; // imagens anexadas via input file
+
+/* --------------------------------------------------------
+   Função para adicionar imagem ao editor + preview
+---------------------------------------------------------*/
+function addImageToEditor(file) {
+  const reader = new FileReader();
+
+  // Quando o arquivo for lido
+  reader.onload = () => {
+    /* ---- Inserir imagem dentro do editor visual ---- */
+    const img = document.createElement("img");
+    img.src = reader.result; // Base64 da imagem
+    bodyEditor.appendChild(img);
+
+    /* ---- Mostrar miniatura abaixo (preview) ---- */
+    const prev = document.createElement("img");
+    prev.src = reader.result;
+    preview.appendChild(prev);
+  };
+
+  // Lê o arquivo como Base64
+  reader.readAsDataURL(file);
+}
+
+/* --------------------------------------------------------
+   Evento: COLAR imagens no editor (Firefox + Chrome)
+---------------------------------------------------------*/
+bodyEditor.addEventListener("paste", (event) => {
+  event.preventDefault(); // impede colagem padrão
+
+  const clipboard = event.clipboardData;
+
+  /* 🔥 SUPORTE PARA FIREFOX 
+     Firefox coloca imagens em clipboard.files
+  ---------------------------------------------------------*/
+  if (clipboard.files && clipboard.files.length > 0) {
+    for (const file of clipboard.files) {
+      if (file.type.startsWith("image/")) { // garante que é imagem
+        pastedImages.push(file);
+        addImageToEditor(file);
+      }
+    }
+    return; // encerra o fluxo para Firefox
+  }
+
+  /* 🔥 SUPORTE PARA CHROME / EDGE 
+     Chrome coloca imagens em clipboard.items
+  ---------------------------------------------------------*/
+  const items = clipboard.items;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+
+    if (item.type.indexOf("image") === 0) {
+      const blob = item.getAsFile(); // converte item para arquivo
+      pastedImages.push(blob);
+      addImageToEditor(blob);
+    }
+  }
+});
+
+/* --------------------------------------------------------
+   Evento: Selecionar imagens manualmente no <input>
+---------------------------------------------------------*/
+fileInput.addEventListener("change", () => {
+  for (const file of fileInput.files) {
+    if (file.type.startsWith("image/")) {
+      attachedImages.push(file);
+      addImageToEditor(file);
+    }
+  }
+});
+
+/* --------------------------------------------------------
+   Envio do formulário para o servidor
+---------------------------------------------------------*/
+document.getElementById("emailForm").addEventListener("submit", async (e) => {
+  e.preventDefault(); // evita recarregar a página
+
+  const formData = new FormData(e.target);
+
+  // Adiciona o conteúdo atual do editor ao formulário
+  formData.append("body", bodyEditor.innerHTML);
+
+  /* Adiciona imagens coladas ao FormData */
+  pastedImages.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  /* Adiciona imagens anexadas manualmente */
+  attachedImages.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  /* Faz a requisição para o seu backend */
+  const response = await fetch("https://api-danilo-send-email.vercel.app/send-email", {
+    method: "POST",
+    body: formData
+  });
+
+  const result = await response.json();
+
+  /* Mostra a resposta do servidor */
+  alert("Status: " + result.status + "\n" + result.message);
+});
+</script>
+
+</body>
+</html>
