@@ -8,6 +8,7 @@ import { getDateSimple } from "../../utils/getDate.js";
  * @param {import("express").Response} res - O objeto de resposta para retornar a resposta ao cliente.
  * 
  * A função espera que o corpo da requisição contenha os seguintes campos:
+ * - name: Nome do usuário de e-mail do remetente.
  * - from: Endereço de e-mail do remetente.
  * - password: Senha do e-mail do remetente (preferencialmente uma senha de app, e não a senha da conta diretamente).
  * - to: Endereço de e-mail do destinatário.
@@ -66,14 +67,11 @@ export const sendEmail = async (req, res) => {
       );
     });
 
-    let sendFromName = null
-    if(name) {
-      sendFromName = `"${name}" <${from}>`
-    }
+    let sendFromName = name ? `"${name}" <${from}>` : from;
     
     // Envio do e-mail com o corpo HTML e os anexos (imagens embutidas)
     const info = await transporter.sendMail({
-      from: sendFromName ? sendFromName : from,        // E-mail do remetente
+      from: sendFromName, // E-mail do remetente
       to,          // E-mail do destinatário
       subject,     // Assunto do e-mail
       text: body,  // Corpo do e-mail em texto simples (caso o destinatário não suporte HTML)
