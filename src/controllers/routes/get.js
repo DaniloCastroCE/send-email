@@ -18,6 +18,7 @@ export const help = (req, res) => {
         "Esta rota permite enviar um e-mail, podendo incluir um corpo com texto HTML (como rich text ou imagens) e arquivos anexados.",
 
       request_body: {
+        name: "Nome do usuário de email rementente.",
         from: "Endereço de e-mail do remetente (obrigatório)",
         password:
           "Senha do e-mail do remetente ou senha de aplicativo (obrigatório)",
