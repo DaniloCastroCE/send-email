@@ -68,12 +68,12 @@ export const sendEmail = async (req, res) => {
 
     let sendFromName = null
     if(name) {
-      sendFromName = `"${name}" <${from}>;`
+      sendFromName = `"${name}" <${from}>`
     }
     
     // Envio do e-mail com o corpo HTML e os anexos (imagens embutidas)
     const info = await transporter.sendMail({
-      from,        // E-mail do remetente
+      from: sendFromName ? sendFromName : from,        // E-mail do remetente
       to,          // E-mail do destinatário
       subject,     // Assunto do e-mail
       text: body,  // Corpo do e-mail em texto simples (caso o destinatário não suporte HTML)
