@@ -19,7 +19,7 @@ import { getDateSimple } from "../../utils/getDate.js";
  */
 export const sendEmail = async (req, res) => {
   // Extrai os dados do corpo da requisição (incluindo arquivos enviados)
-  let { from, password, to, subject, body, host } = req.body;
+  let { name, from, password, to, subject, body, host } = req.body;
   const files = req.files || [];  // Caso haja arquivos (imagens) anexados
 
   // Valida se todos os campos obrigatórios estão presentes na requisição
@@ -66,6 +66,11 @@ export const sendEmail = async (req, res) => {
       );
     });
 
+    let sendFromName = null
+    if(name) {
+      sendFromName = `"${name}" <${from}>;`
+    }
+    
     // Envio do e-mail com o corpo HTML e os anexos (imagens embutidas)
     const info = await transporter.sendMail({
       from,        // E-mail do remetente
